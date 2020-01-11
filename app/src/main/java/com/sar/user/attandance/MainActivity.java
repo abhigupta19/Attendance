@@ -1,6 +1,7 @@
-                                                                                                                            package com.sar.user.attandance;
+package com.sar.user.attandance;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,18 +23,24 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.HashMap;
 import java.util.Map;
 
-                                                                                                                            public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity {
     FirebaseAuth firebaseAuth;
-    EditText gmail,password,rollnum;
+    EditText gmail,password,rollnum,name;
     FirebaseDatabase firebaseDatabase;
     DatabaseReference databaseReference;
     Map<String,String> map;
+    Map<String,String> map1;
+    SharedPreferences.Editor sharedPreference;
+    public static final String  MY_GLOBAL = "my_global";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         firebaseAuth=FirebaseAuth.getInstance();
+       sharedPreference = (SharedPreferences.Editor) getSharedPreferences(MY_GLOBAL,MODE_PRIVATE).edit();
+
         FirebaseUser firebaseUser=firebaseAuth.getCurrentUser();
         if(firebaseUser!=null) {
             Intent intent = new Intent(this, Mainpage.class);
@@ -44,20 +51,26 @@ import java.util.Map;
          gmail=findViewById(R.id.editText4);
          password=findViewById(R.id.editText);
          rollnum=findViewById(R.id.editText3);
+         name=findViewById(R.id.editText5);
 
         Button button=findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 map=new HashMap<>();
-                map.put("rollnum",rollnum.getText().toString());
+                map.put("rollnumber",rollnum.getText().toString());
                 newuser(gmail.getText().toString(),password.getText().toString());
+                map1=new HashMap<>();
+                map1.put(rollnum.getText().toString(),name.getText().toString());
+
 
 
             }
         });
           firebaseDatabase=FirebaseDatabase.getInstance();
-         databaseReference=firebaseDatabase.getReference("userss");
+         databaseReference=firebaseDatabase.getReference();
+
+
 
     }
     private void newuser(String name,String password)
@@ -68,7 +81,11 @@ import java.util.Map;
                 Toast.makeText(MainActivity.this,"Registration complete",Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(MainActivity.this,Mainpage.class));
                 databaseReference.child(firebaseAuth.getCurrentUser().getUid()).setValue(map);
+                databaseReference.child("users_roll").setValue(map);
+                databaseReference.child("users_name").setValue(map1);
                 Log.d("hiiiii",firebaseAuth.getCurrentUser().getUid());
+                sharedPreference.putInt("floe",1);
+                sharedPreference.commit();
 
 
             }
